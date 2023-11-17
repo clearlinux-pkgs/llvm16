@@ -1,0 +1,113 @@
+From f4f319d0a7922924f205940b7a3dee7575e97dbc Mon Sep 17 00:00:00 2001
+From: William Douglas <william.douglas@intel.com>
+Date: Thu, 30 Mar 2023 11:30:47 -0700
+Subject: [PATCH 4/9] Detect Clear Linux and apply Clear's default linker
+ options
+
+Enum placed at the end to avoid Binary Compatibility break when
+backporting this patch.
+
+Signed-off-by: William Douglas <william.douglas@intel.com>
+---
+ clang/include/clang/Driver/Distro.h   |  4 ++++
+ clang/lib/Driver/Distro.cpp           | 13 +++++++++++++
+ clang/lib/Driver/ToolChains/Linux.cpp |  4 ++--
+ clang/unittests/Driver/DistroTest.cpp | 16 ++++++++++++++++
+ 4 files changed, 35 insertions(+), 2 deletions(-)
+
+diff --git a/clang/include/clang/Driver/Distro.h b/clang/include/clang/Driver/Distro.h
+index 1aaf93ddb..2ce93e0b4 100644
+--- a/clang/include/clang/Driver/Distro.h
++++ b/clang/include/clang/Driver/Distro.h
+@@ -30,6 +30,7 @@ public:
+     // the first and last known member in the family, e.g. IsRedHat().
+     AlpineLinux,
+     ArchLinux,
++    ClearLinux,
+     DebianLenny,
+     DebianSqueeze,
+     DebianWheezy,
+@@ -130,6 +131,9 @@ public:
+   bool IsUbuntu() const {
+     return DistroVal >= UbuntuHardy && DistroVal <= UbuntuLunar;
+   }
++  bool IsClearLinux() const {
++    return DistroVal == ClearLinux;
++  }
+ 
+   bool IsAlpineLinux() const { return DistroVal == AlpineLinux; }
+ 
+diff --git a/clang/lib/Driver/Distro.cpp b/clang/lib/Driver/Distro.cpp
+index 87a0c5a58..d557eb79d 100644
+--- a/clang/lib/Driver/Distro.cpp
++++ b/clang/lib/Driver/Distro.cpp
+@@ -201,6 +201,19 @@ static Distro::DistroType DetectDistro(llvm::vfs::FileSystem &VFS) {
+   if (VFS.exists("/etc/gentoo-release"))
+     return Distro::Gentoo;
+ 
++  File = VFS.getBufferForFile("/usr/lib/os-release");
++  if (File) {
++    StringRef Data = File.get()->getBuffer();
++    SmallVector<StringRef, 16> Lines;
++    Data.split(Lines, "\n");
++    Distro::DistroType Version = Distro::UnknownDistro;
++    for (StringRef Line : Lines)
++      if (Version == Distro::UnknownDistro && Line.startswith("ID_LIKE="))
++        Version = llvm::StringSwitch<Distro::DistroType>(Line.substr(7))
++                      .Case("clear-linux-os", Distro::ClearLinux);
++    return Version;
++  }
++
+   return Distro::UnknownDistro;
+ }
+ 
+diff --git a/clang/lib/Driver/ToolChains/Linux.cpp b/clang/lib/Driver/ToolChains/Linux.cpp
+index c6fb290ff..420c26a77 100644
+--- a/clang/lib/Driver/ToolChains/Linux.cpp
++++ b/clang/lib/Driver/ToolChains/Linux.cpp
+@@ -191,13 +191,13 @@ Linux::Linux(const Driver &D, const llvm::Triple &Triple, const ArgList &Args)
+ 
+   Distro Distro(D.getVFS(), Triple);
+ 
+-  if (Distro.IsAlpineLinux() || Triple.isAndroid()) {
++  if (Distro.IsAlpineLinux() || Distro.IsClearLinux() || Triple.isAndroid()) {
+     ExtraOpts.push_back("-z");
+     ExtraOpts.push_back("now");
+   }
+ 
+   if (Distro.IsOpenSUSE() || Distro.IsUbuntu() || Distro.IsAlpineLinux() ||
+-      Triple.isAndroid()) {
++      Distro.IsClearLinux() || Triple.isAndroid()) {
+     ExtraOpts.push_back("-z");
+     ExtraOpts.push_back("relro");
+   }
+diff --git a/clang/unittests/Driver/DistroTest.cpp b/clang/unittests/Driver/DistroTest.cpp
+index ebf75dc7c..05faec9b5 100644
+--- a/clang/unittests/Driver/DistroTest.cpp
++++ b/clang/unittests/Driver/DistroTest.cpp
+@@ -340,6 +340,22 @@ TEST(DistroTest, DetectGentoo) {
+   ASSERT_TRUE(Gentoo.IsGentoo());
+ }
+ 
++TEST(DistroTest, DetectClearLinux) {
++  vfs::InMemoryFileSystem ClearLinuxFileSystem;
++  ClearLinuxFileSystem.addFile("/usr/lib/os-release", 0,
++      llvm::MemoryBuffer::getMemBuffer("NAME=\"Clear Linux OS\"\n"
++                                       "VERSION=1\n"
++                                       "ID=clear-linux-os\n"
++                                       "ID_LIKE=clear-linux-os\n"
++                                       "VERSION_ID=25530\n"
++                                       "PRETTY_NAME=\"Clear Linux OS\"\n"
++                                       "ANSI_COLOR=\"1;35\"\n"
++                                       "HOME_URL=\"https://clearlinux.org\"\n"
++                                       "SUPPORT_URL=\"https://clearlinux.org\"\n"
++                                       "BUG_REPORT_URL=\"mailto:dev@lists.clearlinux.org\"\n"
++                                       "PRIVACY_POLICY_URL=\"http://www.intel.com/privacy\"\n"));
++}
++
+ TEST(DistroTest, DetectWindowsAndCrossCompile) {
+ 
+   class CountingFileSystem : public llvm::vfs::ProxyFileSystem {
+-- 
+2.40.0
+
