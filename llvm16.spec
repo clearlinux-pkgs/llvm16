@@ -10,12 +10,10 @@
 %define keepstatic 1
 Name     : llvm16
 Version  : 16.0.6
-Release  : 185
+Release  : 186
 URL      : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source0  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
-Source1  : https://github.com/KhronosGroup/SPIRV-Headers/archive/sdk-1.3.250.0/SPIRV-Headers-sdk-1.3.250.0.tar.gz
-Source2  : https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/refs/tags/v16.0.0.tar.gz
-Source3  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
+Source1  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
 Summary  : Google microbenchmark framework
 Group    : Development/Tools
 License  : Apache-2.0 BSD-3-Clause ISC MIT MPL-2.0 NCSA
@@ -34,13 +32,8 @@ BuildRequires : cmake
 BuildRequires : curl-dev
 BuildRequires : doxygen
 BuildRequires : elfutils-dev
-BuildRequires : gcc-dev32
-BuildRequires : gcc-libgcc32
-BuildRequires : gcc-libstdc++32
 BuildRequires : git
 BuildRequires : glibc-dev
-BuildRequires : glibc-dev32
-BuildRequires : glibc-libc32
 BuildRequires : googletest-dev
 BuildRequires : libffi-dev
 BuildRequires : libffi-dev32
@@ -54,7 +47,6 @@ BuildRequires : ncurses-dev
 BuildRequires : ninja
 BuildRequires : perl
 BuildRequires : pkg-config
-BuildRequires : pkgconfig(32libffi)
 BuildRequires : pkgconfig(libedit)
 BuildRequires : pkgconfig(libffi)
 BuildRequires : protobuf-dev
@@ -100,17 +92,6 @@ Requires: llvm-staticdev = %{version}-%{release}
 dev components for the llvm16 package.
 
 
-%package dev32
-Summary: dev32 components for the llvm16 package.
-Group: Default
-Requires: llvm16-lib32 = %{version}-%{release}
-Requires: llvm16-bin = %{version}-%{release}
-Requires: llvm16-dev = %{version}-%{release}
-
-%description dev32
-dev32 components for the llvm16 package.
-
-
 %package lib
 Summary: lib components for the llvm16 package.
 Group: Libraries
@@ -118,15 +99,6 @@ Requires: llvm16-license = %{version}-%{release}
 
 %description lib
 lib components for the llvm16 package.
-
-
-%package lib32
-Summary: lib32 components for the llvm16 package.
-Group: Default
-Requires: llvm16-license = %{version}-%{release}
-
-%description lib32
-lib32 components for the llvm16 package.
 
 
 %package license
@@ -137,26 +109,9 @@ Group: Default
 license components for the llvm16 package.
 
 
-%package staticdev32
-Summary: staticdev32 components for the llvm16 package.
-Group: Default
-Requires: llvm16-dev = %{version}-%{release}
-
-%description staticdev32
-staticdev32 components for the llvm16 package.
-
-
 %prep
 %setup -q -n llvm-project-16.0.6.src
-cd %{_builddir}
-tar xf %{_sourcedir}/v16.0.0.tar.gz
-cd %{_builddir}
-tar xf %{_sourcedir}/SPIRV-Headers-sdk-1.3.250.0.tar.gz
 cd %{_builddir}/llvm-project-16.0.6.src
-mkdir -p llvm/projects/SPIRV-LLVM-Translator
-cp -r %{_builddir}/SPIRV-LLVM-Translator-16.0.0/* %{_builddir}/llvm-project-16.0.6.src/llvm/projects/SPIRV-LLVM-Translator
-mkdir -p llvm/projects/SPIRV-Headers
-cp -r %{_builddir}/SPIRV-Headers-sdk-1.3.250.0/* %{_builddir}/llvm-project-16.0.6.src/llvm/projects/SPIRV-Headers
 %patch -P 1 -p1
 %patch -P 2 -p1
 %patch -P 3 -p1
@@ -207,7 +162,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1700250482
+export SOURCE_DATE_EPOCH=1700267918
 unset LD_AS_NEEDED
 pushd llvm
 mkdir -p clr-build
@@ -266,70 +221,6 @@ echo -DLLVM_ENABLE_PROJECTS="clang" \
 esac`
 ninja  %{?_smp_mflags}
 popd
-mkdir -p clr-build32
-pushd clr-build32
-export GCC_IGNORE_WERROR=1
-export CC=clang
-export CXX=clang++
-export LD=ld.gold
-CLEAR_INTERMEDIATE_CFLAGS=${CLEAR_ORIG_CFLAGS/ -Wa,/ -fno-integrated-as -Wa,}
-CLEAR_INTERMEDIATE_CXXFLAGS=${CLEAR_ORIG_CXXFLAGS/ -Wa,/ -fno-integrated-as -Wa,}
-CLEAR_INTERMEDIATE_CFLAGS="-O2 -g -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wformat -Wformat-security -Wno-error -Wl,-z,max-page-size=0x4000 -march=westmere"
-CLEAR_INTERMEDIATE_CXXFLAGS=$CLEAR_INTERMEDIATE_CFLAGS
-CLEAR_INTERMEDIATE_FFLAGS="-O2 -g -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=32 -Wno-error -Wl,-z,max-page-size=0x4000 -march=westmere"
-CLEAR_INTERMEDIATE_FCFLAGS=$CLEAR_INTERMEDIATE_FFLAGS
-CLEAR_INTERMEDIATE_CFLAGS="$CLEAR_INTERMEDIATE_CFLAGS -fno-lto "
-CLEAR_INTERMEDIATE_FCFLAGS="$CLEAR_INTERMEDIATE_FFLAGS -fno-lto "
-CLEAR_INTERMEDIATE_FFLAGS="$CLEAR_INTERMEDIATE_FFLAGS -fno-lto "
-CLEAR_INTERMEDIATE_CXXFLAGS="$CLEAR_INTERMEDIATE_CXXFLAGS -fno-lto "
-CFLAGS="$CLEAR_INTERMEDIATE_CFLAGS"
-CXXFLAGS="$CLEAR_INTERMEDIATE_CXXFLAGS"
-FFLAGS="$CLEAR_INTERMEDIATE_FFLAGS"
-FCFLAGS="$CLEAR_INTERMEDIATE_FCFLAGS"
-ASFLAGS="$CLEAR_INTERMEDIATE_ASFLAGS"
-LDFLAGS="$CLEAR_INTERMEDIATE_LDFLAGS"
-export PKG_CONFIG_PATH="/usr/lib32/pkgconfig:/usr/share/pkgconfig"
-ASFLAGS="${CLEAR_INTERMEDIATE_ASFLAGS}${CLEAR_INTERMEDIATE_ASFLAGS:+ }--32"
-CFLAGS="${CLEAR_INTERMEDIATE_CFLAGS}${CLEAR_INTERMEDIATE_CFLAGS:+ }-m32 -mstackrealign"
-CXXFLAGS="${CLEAR_INTERMEDIATE_CXXFLAGS}${CLEAR_INTERMEDIATE_CXXFLAGS:+ }-m32 -mstackrealign"
-LDFLAGS="${CLEAR_INTERMEDIATE_LDFLAGS}${CLEAR_INTERMEDIATE_LDFLAGS:+ }-m32 -mstackrealign"
-unset LD_ORDERING_SCRIPT_MAP
-unset GOLD_ORDERING_SCRIPT_MAP
-%cmake -DLIB_INSTALL_DIR:PATH=/usr/lib32 -DCMAKE_INSTALL_LIBDIR=/usr/lib32 -DLIB_SUFFIX=32 .. -G Ninja \
--DCMAKE_C_FLAGS="`sed -E 's/-Wl,\S+\s//g; s/-Wp,-D_FORTIFY_SOURCE=2//' <<<$CFLAGS`" \
--DCMAKE_CXX_FLAGS="`sed -E 's/-Wl,\S+\s//g; s/-Wp,-D_FORTIFY_SOURCE=2//' <<<$CXXFLAGS`" \
--DCMAKE_EXE_LINKER_FLAGS="$CXXFLAGS -Wl,--as-needed -Wl,--build-id=sha1" \
--DCMAKE_MODULE_LINKER_FLAGS="$CXXFLAGS -Wl,--as-needed -Wl,--build-id=sha1" \
--DCMAKE_SHARED_LINKER_FLAGS="$CXXFLAGS -Wl,--as-needed -Wl,--build-id=sha1" \
--DENABLE_LINKER_BUILD_ID=ON \
--DCLANG_DEFAULT_PIE_ON_LINUX=ON \
--DBUILD_SHARED_LIBS:BOOL=OFF \
--DLLVM_LINK_LLVM_DYLIB:BOOL=ON \
--DCLANG_LINK_CLANG_DYLIB:BOOL=ON \
--DLLVM_BUILD_RUNTIME:BOOL=ON \
--DLLVM_BUILD_TOOLS:BOOL=ON \
--DLLVM_ENABLE_FFI:BOOL=ON -DFFI_INCLUDE_DIR=`pkg-config --variable=includedir libffi` \
--DLLVM_ENABLE_RTTI:BOOL=ON \
--DLLVM_ENABLE_ZLIB:BOOL=ON \
--DLLVM_REQUIRES_RTTI:BOOL=ON \
--DLLVM_TABLEGEN=$LLVM_TABLEGEN \
--DCLANG_TABLEGEN=$CLANG_TABLEGEN \
--DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
--DLLVM_LIBDIR_SUFFIX=64 \
--DLLVM_BINUTILS_INCDIR=/usr/include \
--DLLVM_HOST_TRIPLE="x86_64-generic-linux" \
--DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3 \
-`case "$PWD" in *build32) \
-echo -DLLVM_BUILD_TOOLS:BOOL=OFF -DLLVM_TOOL_CLANG_BUILD:BOOL=OFF; \
-echo -DLLVM_TOOL_COMPILER_RT_BUILD:BOOL=OFF -DLLVM_TOOL_LLD_BUILD:BOOL=OFF; \
-echo -DLLVM_TOOL_OPENMP_BUILD:BOOL=OFF -DLLVM_TOOL_COMPILER_RT_BUILD:BOOL=OFF; \
-echo -DLLVM_LIBDIR_SUFFIX=32 -DLLVM_HOST_TRIPLE="i686-generic-linux"; \
-echo -DLLVM_ENABLE_PROJECTS="clang" \
-;; \
-esac`
-ninja  %{?_smp_mflags}
-unset PKG_CONFIG_PATH
-popd
 popd
 
 %install
@@ -353,11 +244,9 @@ FFLAGS="$CLEAR_INTERMEDIATE_FFLAGS"
 FCFLAGS="$CLEAR_INTERMEDIATE_FCFLAGS"
 ASFLAGS="$CLEAR_INTERMEDIATE_ASFLAGS"
 LDFLAGS="$CLEAR_INTERMEDIATE_LDFLAGS"
-export SOURCE_DATE_EPOCH=1700250482
+export SOURCE_DATE_EPOCH=1700267918
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/llvm16
-cp %{_builddir}/SPIRV-Headers-sdk-1.3.250.0/LICENSE %{buildroot}/usr/share/package-licenses/llvm16/9a84200f47e09abfbde1a6b25028460451b23d03 || :
-cp %{_builddir}/SPIRV-LLVM-Translator-16.0.0/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/8f178caf2a2d6e6c711a30da69077572df356cf6 || :
 cp %{_builddir}/llvm-project-%{version}.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/af07f365643f841c69797e9059b66f0bd847f1cd || :
 cp %{_builddir}/llvm-project-%{version}.src/bolt/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/af07f365643f841c69797e9059b66f0bd847f1cd || :
 cp %{_builddir}/llvm-project-%{version}.src/clang-tools-extra/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/a1691103171dc1d21cfa85f1d4809a16b9f1367f || :
@@ -392,21 +281,6 @@ cp %{_builddir}/llvm-project-%{version}.src/third-party/benchmark/LICENSE %{buil
 cp %{_builddir}/llvm-project-%{version}.src/third-party/unittest/googlemock/LICENSE.txt %{buildroot}/usr/share/package-licenses/llvm16/5a2314153eadadc69258a9429104cd11804ea304 || :
 cp %{_builddir}/llvm-project-%{version}.src/third-party/unittest/googletest/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/5a2314153eadadc69258a9429104cd11804ea304 || :
 pushd llvm
-pushd clr-build32
-%ninja_install32
-if [ -d  %{buildroot}/usr/lib32/pkgconfig ]
-then
-pushd %{buildroot}/usr/lib32/pkgconfig
-for i in *.pc ; do ln -s $i 32$i ; done
-popd
-fi
-if [ -d %{buildroot}/usr/share/pkgconfig ]
-then
-pushd %{buildroot}/usr/share/pkgconfig
-for i in *.pc ; do ln -s $i 32$i ; done
-popd
-fi
-popd
 pushd clr-build
 %ninja_install
 popd
@@ -472,28 +346,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 
 %files
 %defattr(-,root,root,-)
-/usr/lib32/clang/16/include/cuda_wrappers/algorithm
-/usr/lib32/clang/16/include/cuda_wrappers/cmath
-/usr/lib32/clang/16/include/cuda_wrappers/complex
-/usr/lib32/clang/16/include/cuda_wrappers/new
-/usr/lib32/clang/16/include/module.modulemap
-/usr/lib32/clang/16/include/openmp_wrappers/cmath
-/usr/lib32/clang/16/include/openmp_wrappers/complex
-/usr/lib32/clang/16/include/openmp_wrappers/new
-/usr/lib32/libear/__init__.py
-/usr/lib32/libear/config.h.in
-/usr/lib32/libear/ear.c
-/usr/lib32/libscanbuild/__init__.py
-/usr/lib32/libscanbuild/analyze.py
-/usr/lib32/libscanbuild/arguments.py
-/usr/lib32/libscanbuild/clang.py
-/usr/lib32/libscanbuild/compilation.py
-/usr/lib32/libscanbuild/intercept.py
-/usr/lib32/libscanbuild/report.py
-/usr/lib32/libscanbuild/resources/scanview.css
-/usr/lib32/libscanbuild/resources/selectable.js
-/usr/lib32/libscanbuild/resources/sorttable.js
-/usr/lib32/libscanbuild/shell.py
 /usr/lib64/clang/16.0.6/bin/amdgpu-arch
 /usr/lib64/clang/16.0.6/bin/analyze-build
 /usr/lib64/clang/16.0.6/bin/bugpoint
@@ -591,7 +443,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 /usr/lib64/clang/16.0.6/bin/llvm-rtdyld
 /usr/lib64/clang/16.0.6/bin/llvm-sim
 /usr/lib64/clang/16.0.6/bin/llvm-size
-/usr/lib64/clang/16.0.6/bin/llvm-spirv
 /usr/lib64/clang/16.0.6/bin/llvm-split
 /usr/lib64/clang/16.0.6/bin/llvm-stress
 /usr/lib64/clang/16.0.6/bin/llvm-strings
@@ -736,7 +587,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 /usr/bin/llvm-rtdyld-16
 /usr/bin/llvm-sim-16
 /usr/bin/llvm-size-16
-/usr/bin/llvm-spirv-16
 /usr/bin/llvm-split-16
 /usr/bin/llvm-stress-16
 /usr/bin/llvm-strings-16
@@ -762,188 +612,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 
 %files dev
 %defattr(-,root,root,-)
-/usr/lib32/clang/16/include/__clang_cuda_builtin_vars.h
-/usr/lib32/clang/16/include/__clang_cuda_cmath.h
-/usr/lib32/clang/16/include/__clang_cuda_complex_builtins.h
-/usr/lib32/clang/16/include/__clang_cuda_device_functions.h
-/usr/lib32/clang/16/include/__clang_cuda_intrinsics.h
-/usr/lib32/clang/16/include/__clang_cuda_libdevice_declares.h
-/usr/lib32/clang/16/include/__clang_cuda_math.h
-/usr/lib32/clang/16/include/__clang_cuda_math_forward_declares.h
-/usr/lib32/clang/16/include/__clang_cuda_runtime_wrapper.h
-/usr/lib32/clang/16/include/__clang_cuda_texture_intrinsics.h
-/usr/lib32/clang/16/include/__clang_hip_cmath.h
-/usr/lib32/clang/16/include/__clang_hip_libdevice_declares.h
-/usr/lib32/clang/16/include/__clang_hip_math.h
-/usr/lib32/clang/16/include/__clang_hip_runtime_wrapper.h
-/usr/lib32/clang/16/include/__clang_hip_stdlib.h
-/usr/lib32/clang/16/include/__stddef_max_align_t.h
-/usr/lib32/clang/16/include/__wmmintrin_aes.h
-/usr/lib32/clang/16/include/__wmmintrin_pclmul.h
-/usr/lib32/clang/16/include/adxintrin.h
-/usr/lib32/clang/16/include/altivec.h
-/usr/lib32/clang/16/include/ammintrin.h
-/usr/lib32/clang/16/include/amxfp16intrin.h
-/usr/lib32/clang/16/include/amxintrin.h
-/usr/lib32/clang/16/include/arm64intr.h
-/usr/lib32/clang/16/include/arm_acle.h
-/usr/lib32/clang/16/include/arm_bf16.h
-/usr/lib32/clang/16/include/arm_cde.h
-/usr/lib32/clang/16/include/arm_cmse.h
-/usr/lib32/clang/16/include/arm_fp16.h
-/usr/lib32/clang/16/include/arm_mve.h
-/usr/lib32/clang/16/include/arm_neon.h
-/usr/lib32/clang/16/include/arm_neon_sve_bridge.h
-/usr/lib32/clang/16/include/arm_sve.h
-/usr/lib32/clang/16/include/armintr.h
-/usr/lib32/clang/16/include/avx2intrin.h
-/usr/lib32/clang/16/include/avx512bf16intrin.h
-/usr/lib32/clang/16/include/avx512bitalgintrin.h
-/usr/lib32/clang/16/include/avx512bwintrin.h
-/usr/lib32/clang/16/include/avx512cdintrin.h
-/usr/lib32/clang/16/include/avx512dqintrin.h
-/usr/lib32/clang/16/include/avx512erintrin.h
-/usr/lib32/clang/16/include/avx512fintrin.h
-/usr/lib32/clang/16/include/avx512fp16intrin.h
-/usr/lib32/clang/16/include/avx512ifmaintrin.h
-/usr/lib32/clang/16/include/avx512ifmavlintrin.h
-/usr/lib32/clang/16/include/avx512pfintrin.h
-/usr/lib32/clang/16/include/avx512vbmi2intrin.h
-/usr/lib32/clang/16/include/avx512vbmiintrin.h
-/usr/lib32/clang/16/include/avx512vbmivlintrin.h
-/usr/lib32/clang/16/include/avx512vlbf16intrin.h
-/usr/lib32/clang/16/include/avx512vlbitalgintrin.h
-/usr/lib32/clang/16/include/avx512vlbwintrin.h
-/usr/lib32/clang/16/include/avx512vlcdintrin.h
-/usr/lib32/clang/16/include/avx512vldqintrin.h
-/usr/lib32/clang/16/include/avx512vlfp16intrin.h
-/usr/lib32/clang/16/include/avx512vlintrin.h
-/usr/lib32/clang/16/include/avx512vlvbmi2intrin.h
-/usr/lib32/clang/16/include/avx512vlvnniintrin.h
-/usr/lib32/clang/16/include/avx512vlvp2intersectintrin.h
-/usr/lib32/clang/16/include/avx512vnniintrin.h
-/usr/lib32/clang/16/include/avx512vp2intersectintrin.h
-/usr/lib32/clang/16/include/avx512vpopcntdqintrin.h
-/usr/lib32/clang/16/include/avx512vpopcntdqvlintrin.h
-/usr/lib32/clang/16/include/avxifmaintrin.h
-/usr/lib32/clang/16/include/avxintrin.h
-/usr/lib32/clang/16/include/avxneconvertintrin.h
-/usr/lib32/clang/16/include/avxvnniint8intrin.h
-/usr/lib32/clang/16/include/avxvnniintrin.h
-/usr/lib32/clang/16/include/bmi2intrin.h
-/usr/lib32/clang/16/include/bmiintrin.h
-/usr/lib32/clang/16/include/builtins.h
-/usr/lib32/clang/16/include/cet.h
-/usr/lib32/clang/16/include/cetintrin.h
-/usr/lib32/clang/16/include/cldemoteintrin.h
-/usr/lib32/clang/16/include/clflushoptintrin.h
-/usr/lib32/clang/16/include/clwbintrin.h
-/usr/lib32/clang/16/include/clzerointrin.h
-/usr/lib32/clang/16/include/cmpccxaddintrin.h
-/usr/lib32/clang/16/include/cpuid.h
-/usr/lib32/clang/16/include/crc32intrin.h
-/usr/lib32/clang/16/include/emmintrin.h
-/usr/lib32/clang/16/include/enqcmdintrin.h
-/usr/lib32/clang/16/include/f16cintrin.h
-/usr/lib32/clang/16/include/float.h
-/usr/lib32/clang/16/include/fma4intrin.h
-/usr/lib32/clang/16/include/fmaintrin.h
-/usr/lib32/clang/16/include/fxsrintrin.h
-/usr/lib32/clang/16/include/gfniintrin.h
-/usr/lib32/clang/16/include/hexagon_circ_brev_intrinsics.h
-/usr/lib32/clang/16/include/hexagon_protos.h
-/usr/lib32/clang/16/include/hexagon_types.h
-/usr/lib32/clang/16/include/hresetintrin.h
-/usr/lib32/clang/16/include/htmintrin.h
-/usr/lib32/clang/16/include/htmxlintrin.h
-/usr/lib32/clang/16/include/hvx_hexagon_protos.h
-/usr/lib32/clang/16/include/ia32intrin.h
-/usr/lib32/clang/16/include/immintrin.h
-/usr/lib32/clang/16/include/intrin.h
-/usr/lib32/clang/16/include/inttypes.h
-/usr/lib32/clang/16/include/invpcidintrin.h
-/usr/lib32/clang/16/include/iso646.h
-/usr/lib32/clang/16/include/keylockerintrin.h
-/usr/lib32/clang/16/include/larchintrin.h
-/usr/lib32/clang/16/include/limits.h
-/usr/lib32/clang/16/include/lwpintrin.h
-/usr/lib32/clang/16/include/lzcntintrin.h
-/usr/lib32/clang/16/include/mm3dnow.h
-/usr/lib32/clang/16/include/mm_malloc.h
-/usr/lib32/clang/16/include/mmintrin.h
-/usr/lib32/clang/16/include/movdirintrin.h
-/usr/lib32/clang/16/include/msa.h
-/usr/lib32/clang/16/include/mwaitxintrin.h
-/usr/lib32/clang/16/include/nmmintrin.h
-/usr/lib32/clang/16/include/opencl-c-base.h
-/usr/lib32/clang/16/include/opencl-c.h
-/usr/lib32/clang/16/include/openmp_wrappers/__clang_openmp_device_functions.h
-/usr/lib32/clang/16/include/openmp_wrappers/complex.h
-/usr/lib32/clang/16/include/openmp_wrappers/complex_cmath.h
-/usr/lib32/clang/16/include/openmp_wrappers/math.h
-/usr/lib32/clang/16/include/pconfigintrin.h
-/usr/lib32/clang/16/include/pkuintrin.h
-/usr/lib32/clang/16/include/pmmintrin.h
-/usr/lib32/clang/16/include/popcntintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/bmi2intrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/bmiintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/emmintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/immintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/mm_malloc.h
-/usr/lib32/clang/16/include/ppc_wrappers/mmintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/pmmintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/smmintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/tmmintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/x86gprintrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/x86intrin.h
-/usr/lib32/clang/16/include/ppc_wrappers/xmmintrin.h
-/usr/lib32/clang/16/include/prfchiintrin.h
-/usr/lib32/clang/16/include/prfchwintrin.h
-/usr/lib32/clang/16/include/ptwriteintrin.h
-/usr/lib32/clang/16/include/raointintrin.h
-/usr/lib32/clang/16/include/rdpruintrin.h
-/usr/lib32/clang/16/include/rdseedintrin.h
-/usr/lib32/clang/16/include/riscv_vector.h
-/usr/lib32/clang/16/include/rtmintrin.h
-/usr/lib32/clang/16/include/s390intrin.h
-/usr/lib32/clang/16/include/serializeintrin.h
-/usr/lib32/clang/16/include/sgxintrin.h
-/usr/lib32/clang/16/include/shaintrin.h
-/usr/lib32/clang/16/include/smmintrin.h
-/usr/lib32/clang/16/include/stdalign.h
-/usr/lib32/clang/16/include/stdarg.h
-/usr/lib32/clang/16/include/stdatomic.h
-/usr/lib32/clang/16/include/stdbool.h
-/usr/lib32/clang/16/include/stddef.h
-/usr/lib32/clang/16/include/stdint.h
-/usr/lib32/clang/16/include/stdnoreturn.h
-/usr/lib32/clang/16/include/tbmintrin.h
-/usr/lib32/clang/16/include/tgmath.h
-/usr/lib32/clang/16/include/tmmintrin.h
-/usr/lib32/clang/16/include/tsxldtrkintrin.h
-/usr/lib32/clang/16/include/uintrintrin.h
-/usr/lib32/clang/16/include/unwind.h
-/usr/lib32/clang/16/include/vadefs.h
-/usr/lib32/clang/16/include/vaesintrin.h
-/usr/lib32/clang/16/include/varargs.h
-/usr/lib32/clang/16/include/vecintrin.h
-/usr/lib32/clang/16/include/velintrin.h
-/usr/lib32/clang/16/include/velintrin_approx.h
-/usr/lib32/clang/16/include/velintrin_gen.h
-/usr/lib32/clang/16/include/vpclmulqdqintrin.h
-/usr/lib32/clang/16/include/waitpkgintrin.h
-/usr/lib32/clang/16/include/wasm_simd128.h
-/usr/lib32/clang/16/include/wbnoinvdintrin.h
-/usr/lib32/clang/16/include/wmmintrin.h
-/usr/lib32/clang/16/include/x86gprintrin.h
-/usr/lib32/clang/16/include/x86intrin.h
-/usr/lib32/clang/16/include/xmmintrin.h
-/usr/lib32/clang/16/include/xopintrin.h
-/usr/lib32/clang/16/include/xsavecintrin.h
-/usr/lib32/clang/16/include/xsaveintrin.h
-/usr/lib32/clang/16/include/xsaveoptintrin.h
-/usr/lib32/clang/16/include/xsavesintrin.h
-/usr/lib32/clang/16/include/xtestintrin.h
 /usr/lib64/clang/16/include/__clang_cuda_builtin_vars.h
 /usr/lib64/clang/16/include/__clang_cuda_cmath.h
 /usr/lib64/clang/16/include/__clang_cuda_complex_builtins.h
@@ -1127,56 +795,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 /usr/lib64/clang/16/include/xsavesintrin.h
 /usr/lib64/clang/16/include/xtestintrin.h
 
-%files dev32
-%defattr(-,root,root,-)
-/usr/lib32/cmake/clang/AddClang.cmake
-/usr/lib32/cmake/clang/ClangConfig.cmake
-/usr/lib32/cmake/clang/ClangConfigVersion.cmake
-/usr/lib32/cmake/clang/ClangTargets-relwithdebinfo.cmake
-/usr/lib32/cmake/clang/ClangTargets.cmake
-/usr/lib32/cmake/llvm/AddLLVM.cmake
-/usr/lib32/cmake/llvm/AddOCaml.cmake
-/usr/lib32/cmake/llvm/AddSphinxTarget.cmake
-/usr/lib32/cmake/llvm/CheckAtomic.cmake
-/usr/lib32/cmake/llvm/CheckCompilerVersion.cmake
-/usr/lib32/cmake/llvm/CheckProblematicConfigurations.cmake
-/usr/lib32/cmake/llvm/ChooseMSVCCRT.cmake
-/usr/lib32/cmake/llvm/CoverageReport.cmake
-/usr/lib32/cmake/llvm/CrossCompile.cmake
-/usr/lib32/cmake/llvm/DetermineGCCCompatible.cmake
-/usr/lib32/cmake/llvm/FindFFI.cmake
-/usr/lib32/cmake/llvm/FindLibpfm.cmake
-/usr/lib32/cmake/llvm/FindOCaml.cmake
-/usr/lib32/cmake/llvm/FindSphinx.cmake
-/usr/lib32/cmake/llvm/FindTerminfo.cmake
-/usr/lib32/cmake/llvm/FindZ3.cmake
-/usr/lib32/cmake/llvm/Findzstd.cmake
-/usr/lib32/cmake/llvm/GenerateVersionFromVCS.cmake
-/usr/lib32/cmake/llvm/GetErrcMessages.cmake
-/usr/lib32/cmake/llvm/GetLibraryName.cmake
-/usr/lib32/cmake/llvm/HandleLLVMOptions.cmake
-/usr/lib32/cmake/llvm/HandleLLVMStdlib.cmake
-/usr/lib32/cmake/llvm/LLVM-Build.cmake
-/usr/lib32/cmake/llvm/LLVM-Config.cmake
-/usr/lib32/cmake/llvm/LLVMCheckLinkerFlag.cmake
-/usr/lib32/cmake/llvm/LLVMConfig.cmake
-/usr/lib32/cmake/llvm/LLVMConfigExtensions.cmake
-/usr/lib32/cmake/llvm/LLVMConfigVersion.cmake
-/usr/lib32/cmake/llvm/LLVMDistributionSupport.cmake
-/usr/lib32/cmake/llvm/LLVMExports-relwithdebinfo.cmake
-/usr/lib32/cmake/llvm/LLVMExports.cmake
-/usr/lib32/cmake/llvm/LLVMExternalProjectUtils.cmake
-/usr/lib32/cmake/llvm/LLVMInstallSymlink.cmake
-/usr/lib32/cmake/llvm/LLVMProcessSources.cmake
-/usr/lib32/cmake/llvm/SetTargetTriple.cmake
-/usr/lib32/cmake/llvm/TableGen.cmake
-/usr/lib32/cmake/llvm/TensorFlowCompile.cmake
-/usr/lib32/cmake/llvm/UseLibtool.cmake
-/usr/lib32/cmake/llvm/VersionFromVCS.cmake
-/usr/lib32/cmake/llvm/llvm-driver-template.cpp.in
-/usr/lib32/pkgconfig/32LLVMSPIRVLib.pc
-/usr/lib32/pkgconfig/LLVMSPIRVLib.pc
-
 %files lib
 %defattr(-,root,root,-)
 /usr/lib/bfd-plugins/LLVMgold-16.so
@@ -1186,22 +804,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 /usr/lib64/libclang-cpp.so.16
 /usr/lib64/libclang.so.16
 /usr/lib64/libclang.so.16.0.6
-
-%files lib32
-%defattr(-,root,root,-)
-/usr/lib32/LLVMgold.so
-/usr/lib32/libLLVM-16.0.6.so
-/usr/lib32/libLLVM-16.so
-/usr/lib32/libLLVM.so
-/usr/lib32/libLTO.so
-/usr/lib32/libLTO.so.16
-/usr/lib32/libRemarks.so
-/usr/lib32/libRemarks.so.16
-/usr/lib32/libclang-cpp.so
-/usr/lib32/libclang-cpp.so.16
-/usr/lib32/libclang.so
-/usr/lib32/libclang.so.16
-/usr/lib32/libclang.so.16.0.6
 
 %files license
 %defattr(0644,root,root,0755)
@@ -1220,8 +822,6 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 /usr/share/package-licenses/llvm16/8737af83de0d40386dca9a4abe2b6faa83cb4750
 /usr/share/package-licenses/llvm16/8af372ad1edbed2cfaf0e79d25f7136ec6e55b47
 /usr/share/package-licenses/llvm16/8d3b142938f83e7045951089b52676a5605eee37
-/usr/share/package-licenses/llvm16/8f178caf2a2d6e6c711a30da69077572df356cf6
-/usr/share/package-licenses/llvm16/9a84200f47e09abfbde1a6b25028460451b23d03
 /usr/share/package-licenses/llvm16/a1691103171dc1d21cfa85f1d4809a16b9f1367f
 /usr/share/package-licenses/llvm16/af07f365643f841c69797e9059b66f0bd847f1cd
 /usr/share/package-licenses/llvm16/b5d4ab4d1191e592c03310adfbe90d99a46bf9d7
@@ -1232,233 +832,3 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 /usr/share/package-licenses/llvm16/db1f866b29c6a191752c7c5924b7572cdbc47c34
 /usr/share/package-licenses/llvm16/e3cccabb67bd491a643d32a7d2b65b49836e626d
 /usr/share/package-licenses/llvm16/f4359b9da55a3b9e4d9513eb79cacf125fb49e7b
-
-%files staticdev32
-%defattr(-,root,root,-)
-/usr/lib32/libLLVMAArch64AsmParser.a
-/usr/lib32/libLLVMAArch64CodeGen.a
-/usr/lib32/libLLVMAArch64Desc.a
-/usr/lib32/libLLVMAArch64Disassembler.a
-/usr/lib32/libLLVMAArch64Info.a
-/usr/lib32/libLLVMAArch64Utils.a
-/usr/lib32/libLLVMAMDGPUAsmParser.a
-/usr/lib32/libLLVMAMDGPUCodeGen.a
-/usr/lib32/libLLVMAMDGPUDesc.a
-/usr/lib32/libLLVMAMDGPUDisassembler.a
-/usr/lib32/libLLVMAMDGPUInfo.a
-/usr/lib32/libLLVMAMDGPUTargetMCA.a
-/usr/lib32/libLLVMAMDGPUUtils.a
-/usr/lib32/libLLVMARMAsmParser.a
-/usr/lib32/libLLVMARMCodeGen.a
-/usr/lib32/libLLVMARMDesc.a
-/usr/lib32/libLLVMARMDisassembler.a
-/usr/lib32/libLLVMARMInfo.a
-/usr/lib32/libLLVMARMUtils.a
-/usr/lib32/libLLVMAVRAsmParser.a
-/usr/lib32/libLLVMAVRCodeGen.a
-/usr/lib32/libLLVMAVRDesc.a
-/usr/lib32/libLLVMAVRDisassembler.a
-/usr/lib32/libLLVMAVRInfo.a
-/usr/lib32/libLLVMAggressiveInstCombine.a
-/usr/lib32/libLLVMAnalysis.a
-/usr/lib32/libLLVMAsmParser.a
-/usr/lib32/libLLVMAsmPrinter.a
-/usr/lib32/libLLVMBPFAsmParser.a
-/usr/lib32/libLLVMBPFCodeGen.a
-/usr/lib32/libLLVMBPFDesc.a
-/usr/lib32/libLLVMBPFDisassembler.a
-/usr/lib32/libLLVMBPFInfo.a
-/usr/lib32/libLLVMBinaryFormat.a
-/usr/lib32/libLLVMBitReader.a
-/usr/lib32/libLLVMBitWriter.a
-/usr/lib32/libLLVMBitstreamReader.a
-/usr/lib32/libLLVMCFGuard.a
-/usr/lib32/libLLVMCFIVerify.a
-/usr/lib32/libLLVMCodeGen.a
-/usr/lib32/libLLVMCore.a
-/usr/lib32/libLLVMCoroutines.a
-/usr/lib32/libLLVMCoverage.a
-/usr/lib32/libLLVMDWARFLinker.a
-/usr/lib32/libLLVMDWARFLinkerParallel.a
-/usr/lib32/libLLVMDWP.a
-/usr/lib32/libLLVMDebugInfoCodeView.a
-/usr/lib32/libLLVMDebugInfoDWARF.a
-/usr/lib32/libLLVMDebugInfoGSYM.a
-/usr/lib32/libLLVMDebugInfoLogicalView.a
-/usr/lib32/libLLVMDebugInfoMSF.a
-/usr/lib32/libLLVMDebugInfoPDB.a
-/usr/lib32/libLLVMDebuginfod.a
-/usr/lib32/libLLVMDemangle.a
-/usr/lib32/libLLVMDiff.a
-/usr/lib32/libLLVMDlltoolDriver.a
-/usr/lib32/libLLVMExecutionEngine.a
-/usr/lib32/libLLVMExegesis.a
-/usr/lib32/libLLVMExegesisAArch64.a
-/usr/lib32/libLLVMExegesisMips.a
-/usr/lib32/libLLVMExegesisPowerPC.a
-/usr/lib32/libLLVMExegesisX86.a
-/usr/lib32/libLLVMExtensions.a
-/usr/lib32/libLLVMFileCheck.a
-/usr/lib32/libLLVMFrontendHLSL.a
-/usr/lib32/libLLVMFrontendOpenACC.a
-/usr/lib32/libLLVMFrontendOpenMP.a
-/usr/lib32/libLLVMFuzzMutate.a
-/usr/lib32/libLLVMFuzzerCLI.a
-/usr/lib32/libLLVMGlobalISel.a
-/usr/lib32/libLLVMHexagonAsmParser.a
-/usr/lib32/libLLVMHexagonCodeGen.a
-/usr/lib32/libLLVMHexagonDesc.a
-/usr/lib32/libLLVMHexagonDisassembler.a
-/usr/lib32/libLLVMHexagonInfo.a
-/usr/lib32/libLLVMIRPrinter.a
-/usr/lib32/libLLVMIRReader.a
-/usr/lib32/libLLVMInstCombine.a
-/usr/lib32/libLLVMInstrumentation.a
-/usr/lib32/libLLVMInterfaceStub.a
-/usr/lib32/libLLVMInterpreter.a
-/usr/lib32/libLLVMJITLink.a
-/usr/lib32/libLLVMLTO.a
-/usr/lib32/libLLVMLanaiAsmParser.a
-/usr/lib32/libLLVMLanaiCodeGen.a
-/usr/lib32/libLLVMLanaiDesc.a
-/usr/lib32/libLLVMLanaiDisassembler.a
-/usr/lib32/libLLVMLanaiInfo.a
-/usr/lib32/libLLVMLibDriver.a
-/usr/lib32/libLLVMLineEditor.a
-/usr/lib32/libLLVMLinker.a
-/usr/lib32/libLLVMLoongArchAsmParser.a
-/usr/lib32/libLLVMLoongArchCodeGen.a
-/usr/lib32/libLLVMLoongArchDesc.a
-/usr/lib32/libLLVMLoongArchDisassembler.a
-/usr/lib32/libLLVMLoongArchInfo.a
-/usr/lib32/libLLVMMC.a
-/usr/lib32/libLLVMMCA.a
-/usr/lib32/libLLVMMCDisassembler.a
-/usr/lib32/libLLVMMCJIT.a
-/usr/lib32/libLLVMMCParser.a
-/usr/lib32/libLLVMMIRParser.a
-/usr/lib32/libLLVMMSP430AsmParser.a
-/usr/lib32/libLLVMMSP430CodeGen.a
-/usr/lib32/libLLVMMSP430Desc.a
-/usr/lib32/libLLVMMSP430Disassembler.a
-/usr/lib32/libLLVMMSP430Info.a
-/usr/lib32/libLLVMMipsAsmParser.a
-/usr/lib32/libLLVMMipsCodeGen.a
-/usr/lib32/libLLVMMipsDesc.a
-/usr/lib32/libLLVMMipsDisassembler.a
-/usr/lib32/libLLVMMipsInfo.a
-/usr/lib32/libLLVMNVPTXCodeGen.a
-/usr/lib32/libLLVMNVPTXDesc.a
-/usr/lib32/libLLVMNVPTXInfo.a
-/usr/lib32/libLLVMObjCARCOpts.a
-/usr/lib32/libLLVMObjCopy.a
-/usr/lib32/libLLVMObject.a
-/usr/lib32/libLLVMObjectYAML.a
-/usr/lib32/libLLVMOption.a
-/usr/lib32/libLLVMOrcJIT.a
-/usr/lib32/libLLVMOrcShared.a
-/usr/lib32/libLLVMOrcTargetProcess.a
-/usr/lib32/libLLVMPasses.a
-/usr/lib32/libLLVMPowerPCAsmParser.a
-/usr/lib32/libLLVMPowerPCCodeGen.a
-/usr/lib32/libLLVMPowerPCDesc.a
-/usr/lib32/libLLVMPowerPCDisassembler.a
-/usr/lib32/libLLVMPowerPCInfo.a
-/usr/lib32/libLLVMProfileData.a
-/usr/lib32/libLLVMRISCVAsmParser.a
-/usr/lib32/libLLVMRISCVCodeGen.a
-/usr/lib32/libLLVMRISCVDesc.a
-/usr/lib32/libLLVMRISCVDisassembler.a
-/usr/lib32/libLLVMRISCVInfo.a
-/usr/lib32/libLLVMRISCVTargetMCA.a
-/usr/lib32/libLLVMRemarks.a
-/usr/lib32/libLLVMRuntimeDyld.a
-/usr/lib32/libLLVMSPIRVLib.a
-/usr/lib32/libLLVMScalarOpts.a
-/usr/lib32/libLLVMSelectionDAG.a
-/usr/lib32/libLLVMSparcAsmParser.a
-/usr/lib32/libLLVMSparcCodeGen.a
-/usr/lib32/libLLVMSparcDesc.a
-/usr/lib32/libLLVMSparcDisassembler.a
-/usr/lib32/libLLVMSparcInfo.a
-/usr/lib32/libLLVMSupport.a
-/usr/lib32/libLLVMSymbolize.a
-/usr/lib32/libLLVMSystemZAsmParser.a
-/usr/lib32/libLLVMSystemZCodeGen.a
-/usr/lib32/libLLVMSystemZDesc.a
-/usr/lib32/libLLVMSystemZDisassembler.a
-/usr/lib32/libLLVMSystemZInfo.a
-/usr/lib32/libLLVMTableGen.a
-/usr/lib32/libLLVMTableGenGlobalISel.a
-/usr/lib32/libLLVMTarget.a
-/usr/lib32/libLLVMTargetParser.a
-/usr/lib32/libLLVMTextAPI.a
-/usr/lib32/libLLVMTransformUtils.a
-/usr/lib32/libLLVMVEAsmParser.a
-/usr/lib32/libLLVMVECodeGen.a
-/usr/lib32/libLLVMVEDesc.a
-/usr/lib32/libLLVMVEDisassembler.a
-/usr/lib32/libLLVMVEInfo.a
-/usr/lib32/libLLVMVectorize.a
-/usr/lib32/libLLVMWebAssemblyAsmParser.a
-/usr/lib32/libLLVMWebAssemblyCodeGen.a
-/usr/lib32/libLLVMWebAssemblyDesc.a
-/usr/lib32/libLLVMWebAssemblyDisassembler.a
-/usr/lib32/libLLVMWebAssemblyInfo.a
-/usr/lib32/libLLVMWebAssemblyUtils.a
-/usr/lib32/libLLVMWindowsDriver.a
-/usr/lib32/libLLVMWindowsManifest.a
-/usr/lib32/libLLVMX86AsmParser.a
-/usr/lib32/libLLVMX86CodeGen.a
-/usr/lib32/libLLVMX86Desc.a
-/usr/lib32/libLLVMX86Disassembler.a
-/usr/lib32/libLLVMX86Info.a
-/usr/lib32/libLLVMX86TargetMCA.a
-/usr/lib32/libLLVMXCoreCodeGen.a
-/usr/lib32/libLLVMXCoreDesc.a
-/usr/lib32/libLLVMXCoreDisassembler.a
-/usr/lib32/libLLVMXCoreInfo.a
-/usr/lib32/libLLVMXRay.a
-/usr/lib32/libLLVMipo.a
-/usr/lib32/libclangAPINotes.a
-/usr/lib32/libclangARCMigrate.a
-/usr/lib32/libclangAST.a
-/usr/lib32/libclangASTMatchers.a
-/usr/lib32/libclangAnalysis.a
-/usr/lib32/libclangAnalysisFlowSensitive.a
-/usr/lib32/libclangAnalysisFlowSensitiveModels.a
-/usr/lib32/libclangBasic.a
-/usr/lib32/libclangCodeGen.a
-/usr/lib32/libclangCrossTU.a
-/usr/lib32/libclangDependencyScanning.a
-/usr/lib32/libclangDirectoryWatcher.a
-/usr/lib32/libclangDriver.a
-/usr/lib32/libclangDynamicASTMatchers.a
-/usr/lib32/libclangEdit.a
-/usr/lib32/libclangExtractAPI.a
-/usr/lib32/libclangFormat.a
-/usr/lib32/libclangFrontend.a
-/usr/lib32/libclangFrontendTool.a
-/usr/lib32/libclangHandleCXX.a
-/usr/lib32/libclangHandleLLVM.a
-/usr/lib32/libclangIndex.a
-/usr/lib32/libclangIndexSerialization.a
-/usr/lib32/libclangInterpreter.a
-/usr/lib32/libclangLex.a
-/usr/lib32/libclangParse.a
-/usr/lib32/libclangRewrite.a
-/usr/lib32/libclangRewriteFrontend.a
-/usr/lib32/libclangSema.a
-/usr/lib32/libclangSerialization.a
-/usr/lib32/libclangStaticAnalyzerCheckers.a
-/usr/lib32/libclangStaticAnalyzerCore.a
-/usr/lib32/libclangStaticAnalyzerFrontend.a
-/usr/lib32/libclangSupport.a
-/usr/lib32/libclangTooling.a
-/usr/lib32/libclangToolingASTDiff.a
-/usr/lib32/libclangToolingCore.a
-/usr/lib32/libclangToolingInclusions.a
-/usr/lib32/libclangToolingInclusionsStdlib.a
-/usr/lib32/libclangToolingRefactoring.a
-/usr/lib32/libclangToolingSyntax.a
-/usr/lib32/libclangTransformer.a
