@@ -2,6 +2,10 @@
 # Rename the Gold plugin elsewhere, as we're erasing *.so below
 mv %{buildroot}/usr/lib64/LLVMgold.so %{buildroot}/usr/lib64/LLVMgold.so.save
 
+# Rename libLLVM (and symlink) elsewhere as we are erasing *.so below
+mkdir -p %{buildroot}/tmp/libllvm
+mv %{buildroot}/usr/lib64/libLLVM-[0-9]*.so %{buildroot}/tmp/libllvm
+
 # Remove files that should come from the main llvm package
 rm -rf %{buildroot}/usr/include
 rm -fr %{buildroot}/usr/lib/libear
@@ -39,9 +43,9 @@ ln -s ../.. lib64/clang/$FULL_VERSION/lib64
 # Put the LLVM gold plugin back, under the versioned name
 mv lib64/LLVMgold.so.save lib64/LLVMgold-$VERSION.so
 
+# Put libLLVM back
+mv %{buildroot}/tmp/libllvm/* %{buildroot}/usr/lib64/
+
 mkdir -p lib/bfd-plugins
 ln -s ../../lib64/LLVMgold-$VERSION.so lib/bfd-plugins
 popd
-
-# delete some unused 32-bit stuff
-rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*

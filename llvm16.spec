@@ -10,7 +10,7 @@
 %define keepstatic 1
 Name     : llvm16
 Version  : 16.0.6
-Release  : 186
+Release  : 187
 URL      : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source0  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source1  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
@@ -162,7 +162,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1700267918
+export SOURCE_DATE_EPOCH=1700509344
 unset LD_AS_NEEDED
 pushd llvm
 mkdir -p clr-build
@@ -206,19 +206,11 @@ LDFLAGS="$CLEAR_INTERMEDIATE_LDFLAGS"
 -DLLVM_REQUIRES_RTTI:BOOL=ON \
 -DLLVM_TABLEGEN=$LLVM_TABLEGEN \
 -DCLANG_TABLEGEN=$CLANG_TABLEGEN \
--DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+-DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;" \
 -DLLVM_LIBDIR_SUFFIX=64 \
 -DLLVM_BINUTILS_INCDIR=/usr/include \
 -DLLVM_HOST_TRIPLE="x86_64-generic-linux" \
--DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3 \
-`case "$PWD" in *build32) \
-echo -DLLVM_BUILD_TOOLS:BOOL=OFF -DLLVM_TOOL_CLANG_BUILD:BOOL=OFF; \
-echo -DLLVM_TOOL_COMPILER_RT_BUILD:BOOL=OFF -DLLVM_TOOL_LLD_BUILD:BOOL=OFF; \
-echo -DLLVM_TOOL_OPENMP_BUILD:BOOL=OFF -DLLVM_TOOL_COMPILER_RT_BUILD:BOOL=OFF; \
-echo -DLLVM_LIBDIR_SUFFIX=32 -DLLVM_HOST_TRIPLE="i686-generic-linux"; \
-echo -DLLVM_ENABLE_PROJECTS="clang" \
-;; \
-esac`
+-DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3
 ninja  %{?_smp_mflags}
 popd
 popd
@@ -244,7 +236,7 @@ FFLAGS="$CLEAR_INTERMEDIATE_FFLAGS"
 FCFLAGS="$CLEAR_INTERMEDIATE_FCFLAGS"
 ASFLAGS="$CLEAR_INTERMEDIATE_ASFLAGS"
 LDFLAGS="$CLEAR_INTERMEDIATE_LDFLAGS"
-export SOURCE_DATE_EPOCH=1700267918
+export SOURCE_DATE_EPOCH=1700509344
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/llvm16
 cp %{_builddir}/llvm-project-%{version}.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/af07f365643f841c69797e9059b66f0bd847f1cd || :
@@ -299,6 +291,10 @@ rm -f %{buildroot}*/usr/lib64/clang/14.0.4/lib/linux/*-i386.so
 # Rename the Gold plugin elsewhere, as we're erasing *.so below
 mv %{buildroot}/usr/lib64/LLVMgold.so %{buildroot}/usr/lib64/LLVMgold.so.save
 
+# Rename libLLVM (and symlink) elsewhere as we are erasing *.so below
+mkdir -p %{buildroot}/tmp/libllvm
+mv %{buildroot}/usr/lib64/libLLVM-[0-9]*.so %{buildroot}/tmp/libllvm
+
 # Remove files that should come from the main llvm package
 rm -rf %{buildroot}/usr/include
 rm -fr %{buildroot}/usr/lib/libear
@@ -336,12 +332,12 @@ ln -s ../.. lib64/clang/$FULL_VERSION/lib64
 # Put the LLVM gold plugin back, under the versioned name
 mv lib64/LLVMgold.so.save lib64/LLVMgold-$VERSION.so
 
+# Put libLLVM back
+mv %{buildroot}/tmp/libllvm/* %{buildroot}/usr/lib64/
+
 mkdir -p lib/bfd-plugins
 ln -s ../../lib64/LLVMgold-$VERSION.so lib/bfd-plugins
 popd
-
-# delete some unused 32-bit stuff
-rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 ## install_append end
 
 %files
@@ -799,6 +795,8 @@ rm -rf %{buildroot}/usr/lib64/clang/*/lib/linux/*-i386*
 %defattr(-,root,root,-)
 /usr/lib/bfd-plugins/LLVMgold-16.so
 /usr/lib64/LLVMgold-16.so
+/usr/lib64/libLLVM-16.0.6.so
+/usr/lib64/libLLVM-16.so
 /usr/lib64/libLTO.so.16
 /usr/lib64/libRemarks.so.16
 /usr/lib64/libclang-cpp.so.16
