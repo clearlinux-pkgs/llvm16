@@ -10,7 +10,7 @@
 %define keepstatic 1
 Name     : llvm16
 Version  : 16.0.6
-Release  : 187
+Release  : 188
 URL      : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source0  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source1  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
@@ -20,7 +20,7 @@ License  : Apache-2.0 BSD-3-Clause ISC MIT MPL-2.0 NCSA
 Requires: llvm16-bin = %{version}-%{release}
 Requires: llvm16-lib = %{version}-%{release}
 Requires: llvm16-license = %{version}-%{release}
-Requires: llvm-dev = %{version}-%{release}
+Requires: llvm16-dev = %{version}-%{release}
 BuildRequires : SPIRV-Tools
 BuildRequires : Sphinx
 BuildRequires : Vulkan-Headers-dev Vulkan-Loader-dev Vulkan-Tools
@@ -86,7 +86,6 @@ Requires: llvm16-lib = %{version}-%{release}
 Requires: llvm16-bin = %{version}-%{release}
 Provides: llvm16-devel = %{version}-%{release}
 Requires: llvm16 = %{version}-%{release}
-Requires: llvm-staticdev = %{version}-%{release}
 
 %description dev
 dev components for the llvm16 package.
