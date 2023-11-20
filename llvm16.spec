@@ -10,7 +10,7 @@
 %define keepstatic 1
 Name     : llvm16
 Version  : 16.0.6
-Release  : 190
+Release  : 191
 URL      : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source0  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source1  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
@@ -287,6 +287,8 @@ rm -f %{buildroot}*/usr/lib64/libclang.so.13
 rm -f %{buildroot}*/usr/lib32/libclang.so.13
 rm -f %{buildroot}*/usr/lib64/clang/14.0.4/lib/linux/*-i386.so
 rm -f %{buildroot}*/usr/lib64/libear/__init__.py
+rm -f %{buildroot}*/usr/lib64/libear/config.h.in
+rm -f %{buildroot}*/usr/lib64/libear/ear.c
 rm -f %{buildroot}*/usr/lib64/libscanbuild/__init__.py
 rm -f %{buildroot}*/usr/lib64/libscanbuild/analyze.py
 rm -f %{buildroot}*/usr/lib64/libscanbuild/arguments.py
@@ -294,6 +296,9 @@ rm -f %{buildroot}*/usr/lib64/libscanbuild/clang.py
 rm -f %{buildroot}*/usr/lib64/libscanbuild/compilation.py
 rm -f %{buildroot}*/usr/lib64/libscanbuild/intercept.py
 rm -f %{buildroot}*/usr/lib64/libscanbuild/report.py
+rm -f %{buildroot}*/usr/lib64/libscanbuild/resources/scanview.css
+rm -f %{buildroot}*/usr/lib64/libscanbuild/resources/selectable.js
+rm -f %{buildroot}*/usr/lib64/libscanbuild/resources/sorttable.js
 rm -f %{buildroot}*/usr/lib64/libscanbuild/shell.py
 ## install_append content
 # Rename the Gold plugin elsewhere, as we're erasing *.so below

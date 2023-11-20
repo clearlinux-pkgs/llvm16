@@ -19,6 +19,8 @@
 
 # Clear out other conflicts with the main package
 /usr/lib64/libear/__init__.py
+/usr/lib64/libear/config.h.in
+/usr/lib64/libear/ear.c
 /usr/lib64/libscanbuild/__init__.py
 /usr/lib64/libscanbuild/analyze.py
 /usr/lib64/libscanbuild/arguments.py
@@ -26,4 +28,7 @@
 /usr/lib64/libscanbuild/compilation.py
 /usr/lib64/libscanbuild/intercept.py
 /usr/lib64/libscanbuild/report.py
+/usr/lib64/libscanbuild/resources/scanview.css
+/usr/lib64/libscanbuild/resources/selectable.js
+/usr/lib64/libscanbuild/resources/sorttable.js
 /usr/lib64/libscanbuild/shell.py
