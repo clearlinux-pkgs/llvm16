@@ -10,7 +10,7 @@
 %define keepstatic 1
 Name     : llvm16
 Version  : 16.0.6
-Release  : 189
+Release  : 190
 URL      : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source0  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source1  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
@@ -478,20 +478,11 @@ popd
 /usr/lib64/clang/16/include/openmp_wrappers/cmath
 /usr/lib64/clang/16/include/openmp_wrappers/complex
 /usr/lib64/clang/16/include/openmp_wrappers/new
-/usr/lib64/libear/__init__.py
 /usr/lib64/libear/config.h.in
 /usr/lib64/libear/ear.c
-/usr/lib64/libscanbuild/__init__.py
-/usr/lib64/libscanbuild/analyze.py
-/usr/lib64/libscanbuild/arguments.py
-/usr/lib64/libscanbuild/clang.py
-/usr/lib64/libscanbuild/compilation.py
-/usr/lib64/libscanbuild/intercept.py
-/usr/lib64/libscanbuild/report.py
 /usr/lib64/libscanbuild/resources/scanview.css
 /usr/lib64/libscanbuild/resources/selectable.js
 /usr/lib64/libscanbuild/resources/sorttable.js
-/usr/lib64/libscanbuild/shell.py
 
 %files bin
 %defattr(-,root,root,-)
