@@ -16,3 +16,14 @@
 /usr/lib32/libclang.so.13
 # delete bunch of 32 ibt gunk
 /usr/lib64/clang/14.0.4/lib/linux/*-i386.so
+
+# Clear out other conflicts with the main package
+/usr/lib64/libear/__init__.py
+/usr/lib64/libscanbuild/__init__.py
+/usr/lib64/libscanbuild/analyze.py
+/usr/lib64/libscanbuild/arguments.py
+/usr/lib64/libscanbuild/clang.py
+/usr/lib64/libscanbuild/compilation.py
+/usr/lib64/libscanbuild/intercept.py
+/usr/lib64/libscanbuild/report.py
+/usr/lib64/libscanbuild/shell.py
