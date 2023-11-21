@@ -8,9 +8,9 @@ mv %{buildroot}/usr/lib64/libLLVM-[0-9]*.so %{buildroot}/tmp/libllvm
 
 # Remove files that should come from the main llvm package
 rm -rf %{buildroot}/usr/include
-rm -fr %{buildroot}/usr/lib/libear
-rm -fr %{buildroot}/usr/lib/libscanbuild
 rm -fr %{buildroot}/usr/lib/python3.11
+rm -fr %{buildroot}/usr/lib64/libear
+rm -fr %{buildroot}/usr/lib64/libscanbuild
 rm -rf %{buildroot}/usr/lib64/*.a
 rm -rf %{buildroot}/usr/lib64/*.so
 rm -rf %{buildroot}/usr/lib64/cmake

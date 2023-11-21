@@ -10,7 +10,7 @@
 %define keepstatic 1
 Name     : llvm16
 Version  : 16.0.6
-Release  : 191
+Release  : 192
 URL      : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source0  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 Source1  : https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz.sig
@@ -161,7 +161,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1700509344
+export SOURCE_DATE_EPOCH=1700524826
 unset LD_AS_NEEDED
 pushd llvm
 mkdir -p clr-build
@@ -235,7 +235,7 @@ FFLAGS="$CLEAR_INTERMEDIATE_FFLAGS"
 FCFLAGS="$CLEAR_INTERMEDIATE_FCFLAGS"
 ASFLAGS="$CLEAR_INTERMEDIATE_ASFLAGS"
 LDFLAGS="$CLEAR_INTERMEDIATE_LDFLAGS"
-export SOURCE_DATE_EPOCH=1700509344
+export SOURCE_DATE_EPOCH=1700524826
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/llvm16
 cp %{_builddir}/llvm-project-%{version}.src/LICENSE.TXT %{buildroot}/usr/share/package-licenses/llvm16/af07f365643f841c69797e9059b66f0bd847f1cd || :
@@ -286,20 +286,6 @@ rm -f %{buildroot}*/usr/lib/python3.11/site-packages/six.py
 rm -f %{buildroot}*/usr/lib64/libclang.so.13
 rm -f %{buildroot}*/usr/lib32/libclang.so.13
 rm -f %{buildroot}*/usr/lib64/clang/14.0.4/lib/linux/*-i386.so
-rm -f %{buildroot}*/usr/lib64/libear/__init__.py
-rm -f %{buildroot}*/usr/lib64/libear/config.h.in
-rm -f %{buildroot}*/usr/lib64/libear/ear.c
-rm -f %{buildroot}*/usr/lib64/libscanbuild/__init__.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/analyze.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/arguments.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/clang.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/compilation.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/intercept.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/report.py
-rm -f %{buildroot}*/usr/lib64/libscanbuild/resources/scanview.css
-rm -f %{buildroot}*/usr/lib64/libscanbuild/resources/selectable.js
-rm -f %{buildroot}*/usr/lib64/libscanbuild/resources/sorttable.js
-rm -f %{buildroot}*/usr/lib64/libscanbuild/shell.py
 ## install_append content
 # Rename the Gold plugin elsewhere, as we're erasing *.so below
 mv %{buildroot}/usr/lib64/LLVMgold.so %{buildroot}/usr/lib64/LLVMgold.so.save
@@ -310,9 +296,9 @@ mv %{buildroot}/usr/lib64/libLLVM-[0-9]*.so %{buildroot}/tmp/libllvm
 
 # Remove files that should come from the main llvm package
 rm -rf %{buildroot}/usr/include
-rm -fr %{buildroot}/usr/lib/libear
-rm -fr %{buildroot}/usr/lib/libscanbuild
 rm -fr %{buildroot}/usr/lib/python3.11
+rm -fr %{buildroot}/usr/lib64/libear
+rm -fr %{buildroot}/usr/lib64/libscanbuild
 rm -rf %{buildroot}/usr/lib64/*.a
 rm -rf %{buildroot}/usr/lib64/*.so
 rm -rf %{buildroot}/usr/lib64/cmake
@@ -483,11 +469,6 @@ popd
 /usr/lib64/clang/16/include/openmp_wrappers/cmath
 /usr/lib64/clang/16/include/openmp_wrappers/complex
 /usr/lib64/clang/16/include/openmp_wrappers/new
-/usr/lib64/libear/config.h.in
-/usr/lib64/libear/ear.c
-/usr/lib64/libscanbuild/resources/scanview.css
-/usr/lib64/libscanbuild/resources/selectable.js
-/usr/lib64/libscanbuild/resources/sorttable.js
 
 %files bin
 %defattr(-,root,root,-)
